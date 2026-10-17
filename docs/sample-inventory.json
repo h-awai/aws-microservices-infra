@@ -1,0 +1,20 @@
+[
+  {
+    "product_id": {"S": "P001"},
+    "product_name": {"S": "プレミアム・ゲーミングキーボード"},
+    "price": {"N": "15800"},
+    "stock_count": {"N": "50"}
+  },
+  {
+    "product_id": {"S": "P002"},
+    "product_name": {"S": "ワイヤレス・エルゴノミクスマウス"},
+    "price": {"N": "9800"},
+    "stock_count": {"N": "120"}
+  },
+  {
+    "product_id": {"S": "P003"},
+    "product_name": {"S": "4K ウルトラワイドモニター 34インチ"},
+    "price": {"N": "64800"},
+    "stock_count": {"N": "15"}
+  }
+]

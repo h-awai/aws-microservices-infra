@@ -1,0 +1,14 @@
+{
+  "name": "ec-hybrid-sample-app",
+  "version": "1.0.0",
+  "description": "EC Site Mock App with Hybrid DB (AWS DynamoDB + Local JSON DB)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "@aws-sdk/client-dynamodb": "^3.500.0",
+    "@aws-sdk/lib-dynamodb": "^3.500.0"
+  }
+}

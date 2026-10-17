@@ -1,0 +1,14 @@
+# 個人情報やAWSアカウントIDを含むパラメータ設定ファイルを除外
+config.ini
+
+# 顧客の個人情報（ローカルDB）を含むデータフォルダを除外
+app/data/
+
+# Node.js依存関係フォルダ
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# OSの一時ファイル
+.DS_Store
+Thumbs.db

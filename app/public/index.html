@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ハイブリッドECサイト管理コンソール (個人情報分離デモ)</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent-aws: #ff9900;
+      --accent-local: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --btn-bg: #4f46e5;
+      --btn-hover: #4338ca;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    header {
+      max-width: 1400px;
+      margin: 0 auto 3rem auto;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a5b4fc, #818cf8, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* メインレイアウト */
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .span-full {
+      grid-column: 1 / -1;
+    }
+
+    /* カードデザイン */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 1rem;
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* バッジ */
+    .badge {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-aws {
+      background-color: rgba(255, 153, 0, 0.15);
+      color: var(--accent-aws);
+      border: 1px solid rgba(255, 153, 0, 0.3);
+    }
+
+    .badge-local {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--accent-local);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-hybrid {
+      background: linear-gradient(135deg, rgba(255, 153, 0, 0.15), rgba(16, 185, 129, 0.15));
+      color: #a5b4fc;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* テーブルデザイン */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      font-size: 0.95rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* フォーム */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    input, select {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #818cf8;
+    }
+
+    button {
+      background-color: var(--btn-bg);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+
+    button:hover {
+      background-color: var(--btn-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .flex-end {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* ハイライト */
+    .highlight-local {
+      color: var(--accent-local);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>EC Site Management Console</h1>
+    <div class="subtitle">ハイブリッド型データベース結合（AWS在庫・売上 ＋ ローカル顧客個人情報）デモ</div>
+  </header>
+
+  <main class="dashboard">
+
+    <!-- 1. 在庫管理カード (AWS) -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">商品在庫状況</h2>
+        <span class="badge badge-aws">AWS DynamoDB</span>
+      </div>
+      <table id="inventory-table">
+        <thead>
+          <tr>
+            <th>商品ID</th>
+            <th>商品名</th>
+            <th>価格</th>
+            <th>在庫数</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">データを読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 2. 顧客管理カード (ローカル) -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">顧客データ管理 (ローカル保持)</h2>
+        <span class="badge badge-local">Local JSON DB</span>
+      </div>
+      
+      <!-- 顧客追加フォーム -->
+      <form id="customer-form" style="margin-bottom: 2rem;">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="c-name">顧客名 (個人情報)</label>
+            <input type="text" id="c-name" placeholder="山田 太郎" required>
+          </div>
+          <div class="form-group">
+            <label for="c-email">メールアドレス (個人情報)</label>
+            <input type="email" id="c-email" placeholder="taro@example.com" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="c-phone">電話番号 (個人情報)</label>
+            <input type="text" id="c-phone" placeholder="090-1234-5678">
+          </div>
+          <div class="form-group flex-end" style="align-items: flex-end;">
+            <button type="submit">ローカルへ追加</button>
+          </div>
+        </div>
+      </form>
+
+      <table id="customer-table">
+        <thead>
+          <tr>
+            <th>名前</th>
+            <th>メール</th>
+            <th>電話番号</th>
+            <th>論理UUID (AWS連携キー)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">データを読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 3. 新規売上登録 (AWSへの書き込み) -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">新規注文登録 (購入手続き)</h2>
+        <span class="badge badge-aws">AWS DynamoDB</span>
+      </div>
+      <form id="sale-form">
+        <div class="form-group">
+          <label for="s-product">購入商品</label>
+          <select id="s-product" required>
+            <option value="">選択してください</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="s-customer">購入者 (ローカル顧客一覧よりUUIDを選択)</label>
+          <select id="s-customer" required>
+            <option value="">選択してください</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="s-quantity">数量</label>
+          <input type="number" id="s-quantity" min="1" value="1" required>
+        </div>
+        <div class="flex-end">
+          <button type="submit" style="background-color: #ff9900; color: #000;">注文を確定 (AWSへ保存)</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 4. 売上履歴＆個人情報マージ (ハイブリッド表示) -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">売上履歴 (個人情報ハイブリッドマージ)</h2>
+        <span class="badge badge-hybrid">Hybrid Joined View</span>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+        ※ AWS側の売上データには <span class="highlight-local">customer_uuid</span> のみが存在します。
+        この画面の表示処理において、ローカルDBの顧客情報を読み込み、メモリ上で結合（JOIN）して表示しています。
+      </p>
+      <table id="sales-table">
+        <thead>
+          <tr>
+            <th>売上ID</th>
+            <th>商品ID</th>
+            <th>数量</th>
+            <th>購入者名 <span class="badge badge-local" style="font-size:0.6rem;">ローカル引き当て</span></th>
+            <th>メールアドレス</th>
+            <th>購入日時</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">データを読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <script>
+    // データロード関数
+    async function loadInventory() {
+      try {
+        const res = await fetch('/api/inventory');
+        const items = await res.json();
+        
+        // テーブル反映
+        const tbody = document.querySelector('#inventory-table tbody');
+        tbody.innerHTML = items.length === 0 
+          ? '<tr><td colspan="4" style="text-align:center;">在庫データがありません</td></tr>'
+          : items.map(item => `
+              <tr>
+                <td><code>${item.product_id}</code></td>
+                <td>${item.product_name}</td>
+                <td>¥${Number(item.price).toLocaleString()}</td>
+                <td>${item.stock_count}</td>
+              </tr>
+            `).join('');
+
+        // 注文フォームのセレクトボックス反映
+        const select = document.getElementById('s-product');
+        select.innerHTML = '<option value="">選択してください</option>' + 
+          items.map(item => `<option value="${item.product_id}">${item.product_name} (¥${item.price})</option>`).join('');
+
+      } catch (err) {
+        console.error("Error loading inventory", err);
+      }
+    }
+
+    async function loadCustomers() {
+      try {
+        const res = await fetch('/api/customers');
+        const customers = await res.json();
+        
+        // テーブル反映
+        const tbody = document.querySelector('#customer-table tbody');
+        tbody.innerHTML = customers.length === 0
+          ? '<tr><td colspan="4" style="text-align:center;">顧客データがありません</td></tr>'
+          : customers.map(c => `
+              <tr>
+                <td><strong>${c.customer_name}</strong></td>
+                <td><code>${c.email}</code></td>
+                <td>${c.phone || '-'}</td>
+                <td><small><code>${c.customer_uuid}</code></small></td>
+              </tr>
+            `).join('');
+
+        // 注文フォームのセレクトボックス反映
+        const select = document.getElementById('s-customer');
+        select.innerHTML = '<option value="">選択してください</option>' + 
+          customers.map(c => `<option value="${c.customer_uuid}">${c.customer_name} (UUID: ${c.customer_uuid.slice(0,8)}...)</option>`).join('');
+
+      } catch (err) {
+        console.error("Error loading customers", err);
+      }
+    }
+
+    async function loadSales() {
+      try {
+        const res = await fetch('/api/sales');
+        const sales = await res.json();
+        
+        // テーブル反映
+        const tbody = document.querySelector('#sales-table tbody');
+        tbody.innerHTML = sales.length === 0
+          ? '<tr><td colspan="6" style="text-align:center;">売上履歴がありません</td></tr>'
+          : sales.map(s => `
+              <tr>
+                <td><small><code>${s.sale_id.slice(0, 8)}...</code></small></td>
+                <td><code>${s.product_id}</code></td>
+                <td>${s.quantity}</td>
+                <td class="highlight-local">${s.customer_name}</td>
+                <td>${s.customer_email}</td>
+                <td><small>${new Date(s.sale_date).toLocaleString()}</small></td>
+              </tr>
+            `).join('');
+      } catch (err) {
+        console.error("Error loading sales", err);
+      }
+    }
+
+    // 顧客登録イベント
+    document.getElementById('customer-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const customer_name = document.getElementById('c-name').value;
+      const email = document.getElementById('c-email').value;
+      const phone = document.getElementById('c-phone').value;
+
+      try {
+        const res = await fetch('/api/customers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer_name, email, phone })
+        });
+        if (res.ok) {
+          document.getElementById('customer-form').reset();
+          await loadCustomers();
+        }
+      } catch (err) {
+        console.error("Error creating customer", err);
+      }
+    });
+
+    // 注文登録イベント
+    document.getElementById('sale-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const product_id = document.getElementById('s-product').value;
+      const customer_uuid = document.getElementById('s-customer').value;
+      const quantity = document.getElementById('s-quantity').value;
+
+      try {
+        const res = await fetch('/api/sales', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product_id, customer_uuid, quantity })
+        });
+        if (res.ok) {
+          document.getElementById('sale-form').reset();
+          await Promise.all([loadInventory(), loadSales()]);
+        }
+      } catch (err) {
+        console.error("Error creating sale", err);
+      }
+    });
+
+    // 初期化
+    async function init() {
+      await Promise.all([loadInventory(), loadCustomers(), loadSales()]);
+    }
+    init();
+  </script>
+</body>
+</html>

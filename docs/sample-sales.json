@@ -1,0 +1,16 @@
+[
+  {
+    "sale_id": {"S": "S001"},
+    "product_id": {"S": "P001"},
+    "customer_uuid": {"S": "c8b4fd4a-f5e9-4e78-be7b-8b5fb0f75a61"},
+    "quantity": {"N": "1"},
+    "sale_date": {"S": "2026-08-15T10:00:00Z"}
+  },
+  {
+    "sale_id": {"S": "S002"},
+    "product_id": {"S": "P002"},
+    "customer_uuid": {"S": "de12ab34-56cd-78ef-90ab-1234567890ab"},
+    "quantity": {"N": "2"},
+    "sale_date": {"S": "2026-08-16T15:30:00Z"}
+  }
+]
